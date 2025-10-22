@@ -2,6 +2,7 @@ package com.becoder.service.impl;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.apache.catalina.mapper.Mapper;
@@ -53,7 +54,7 @@ public class CategoryServiceImpl implements CategoryService {
 	@Override
 	public List<CategoryDto> getAllCategory() {
 
-		List<Category> categories = categoryRepository.findAll();
+		List<Category> categories = categoryRepository.findByIsDeletedFalse();
 
 		List<CategoryDto> categoriesList = categories.stream().map(cat -> mapper.map(cat, CategoryDto.class)).toList();
 
@@ -70,6 +71,40 @@ public class CategoryServiceImpl implements CategoryService {
 				.toList();
 
 		return categoryList;
+	}
+
+	@Override
+	public CategoryDto getCategoryById(Integer id) {
+
+		Optional<Category> findByCategory = categoryRepository.findByIdAndIsDeletedFalse(id);
+
+		if (findByCategory.isPresent()) {
+
+			Category category = findByCategory.get();
+
+			return mapper.map(category, CategoryDto.class);
+		}
+
+		return null;
+	}
+
+	@Override
+	public Boolean deletedCategory(Integer id) {
+
+		Optional<Category> findBycategory = categoryRepository.findById(id);
+
+		if (findBycategory.isPresent()) {
+
+			Category category = findBycategory.get();
+
+			category.setIsDeleted(true);
+
+			categoryRepository.save(category);
+
+			return true;
+		}
+
+		return false;
 	}
 
 }
